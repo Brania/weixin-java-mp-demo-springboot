@@ -1,5 +1,6 @@
 package com.github.binarywang.demo.wechat.config;
 
+import me.chanjar.weixin.mp.constant.WxMpEventConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -23,7 +24,6 @@ import me.chanjar.weixin.mp.api.WxMpConfigStorage;
 import me.chanjar.weixin.mp.api.WxMpInMemoryConfigStorage;
 import me.chanjar.weixin.mp.api.WxMpMessageRouter;
 import me.chanjar.weixin.mp.api.WxMpService;
-import me.chanjar.weixin.mp.api.impl.WxMpServiceImpl;
 
 /**
  * wechat mp configuration
@@ -51,7 +51,10 @@ public class WechatMpConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public WxMpService wxMpService(WxMpConfigStorage configStorage) {
-        WxMpService wxMpService = new WxMpServiceImpl();
+//        WxMpService wxMpService = new me.chanjar.weixin.mp.api.impl.okhttp.WxMpServiceImpl();
+//        WxMpService wxMpService = new me.chanjar.weixin.mp.api.impl.jodd.WxMpServiceImpl();
+//        WxMpService wxMpService = new me.chanjar.weixin.mp.api.impl.apache.WxMpServiceImpl();
+        WxMpService wxMpService = new me.chanjar.weixin.mp.api.impl.WxMpServiceImpl();
         wxMpService.setWxMpConfigStorage(configStorage);
         return wxMpService;
     }
@@ -65,18 +68,19 @@ public class WechatMpConfiguration {
 
         // 接收客服会话管理事件
         newRouter.rule().async(false).msgType(WxConsts.XML_MSG_EVENT)
-            .event(WxConsts.EVT_KF_CREATE_SESSION)
+            .event(WxMpEventConstants.CustomerService.KF_CREATE_SESSION)
             .handler(this.kfSessionHandler).end();
         newRouter.rule().async(false).msgType(WxConsts.XML_MSG_EVENT)
-            .event(WxConsts.EVT_KF_CLOSE_SESSION).handler(this.kfSessionHandler)
+            .event(WxMpEventConstants.CustomerService.KF_CLOSE_SESSION)
+                .handler(this.kfSessionHandler)
             .end();
         newRouter.rule().async(false).msgType(WxConsts.XML_MSG_EVENT)
-            .event(WxConsts.EVT_KF_SWITCH_SESSION)
+            .event(WxMpEventConstants.CustomerService.KF_SWITCH_SESSION)
             .handler(this.kfSessionHandler).end();
         
         // 门店审核事件
         newRouter.rule().async(false).msgType(WxConsts.XML_MSG_EVENT)
-            .event(WxConsts.EVT_POI_CHECK_NOTIFY)
+            .event(WxMpEventConstants.POI_CHECK_NOTIFY)
             .handler(this.storeCheckNotifyHandler).end();
 
         // 自定义菜单事件
